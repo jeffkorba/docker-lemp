@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  nginx:
+    image: nginx:stable-alpine
+    depends_on:
+      - php-fpm
+      - mariadb
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./public:/var/www/html
+      - ./config/nginx:/etc/nginx
+  php-fpm:
+    image: php:fpm-alpine
+    expose:
+      - '9000'
+    volumes:
+      - ./public:/var/www/html
+      - ./config/php-fpm:/usr/local/etc/php
+    # command: sh -c "apk --no-cache add pcre-dev ${PHPIZE_DEPS} && pecl install xdebug && docker-php-ext-enable xdebug"
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+  phpmyadmin:
+    image: phpmyadmin:latest
+    depends_on:
+      - mariadb
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
