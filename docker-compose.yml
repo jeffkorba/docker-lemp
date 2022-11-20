@@ -12,13 +12,12 @@ services:
       - ./public:/var/www/html
       - ./config/nginx:/etc/nginx
   php-fpm:
-    image: php:fpm-alpine
+    build: ./config/php-fpm
     expose:
       - '9000'
     volumes:
       - ./public:/var/www/html
       - ./config/php-fpm:/usr/local/etc/php
-    # command: sh -c "apk --no-cache add pcre-dev ${PHPIZE_DEPS} && pecl install xdebug && docker-php-ext-enable xdebug"
   mariadb:
     image: mariadb:latest
     restart: always
