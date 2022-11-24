@@ -1,23 +1,28 @@
 version: '3.9'
 services:
-  nginx:
+  nginx-wordpress:
     image: nginx:stable-alpine
     depends_on:
       - php-fpm
       - mariadb
+    restart: always
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./public:/var/www/html
       - ./config/nginx:/etc/nginx
-  php-fpm:
-    build: ./config/php-fpm
-    expose:
-      - '9000'
-    volumes:
       - ./public:/var/www/html
-      - ./config/php-fpm:/usr/local/etc/php
+  nginx-phpmyadmin:
+    image: nginx:stable-alpine
+    depends_on:
+      - mariadb
+      - phpmyadmin
+    restart: always
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./config/nginx:/etc/nginx
+      - phpmyadmin:/var/www/html
   mariadb:
     image: mariadb:latest
     restart: always
@@ -25,13 +30,22 @@ services:
       - '3306:3306'
     environment:
       - MARIADB_ROOT_PASSWORD=root
+  php-fpm:
+    build: ./config/php-fpm
+    expose:
+      - '9000'
+    volumes:
+      - ./config/php-fpm:/usr/local/etc/php
+      - ./public:/var/www/html
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: phpmyadmin:fpm-alpine
     depends_on:
       - mariadb
-    restart: always
-    ports:
-      - '8080:80'
+    volumes:
+      - phpmyadmin:/var/www/html
     environment:
       - PMA_ARBITRARY=1
       - PMA_HOST=mariadb
+volumes:
+  phpmyadmin:
+    driver: local
