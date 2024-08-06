@@ -1,6 +1,5 @@
-version: '3.9'
 services:
-  nginx-wordpress:
+  nginx-app:
     image: nginx:stable-alpine
     depends_on:
       - php-fpm
